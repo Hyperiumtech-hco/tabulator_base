@@ -49,7 +49,7 @@ const defaultConfig = {
   },
 };
 
-export function createSpreeadSheetTable(tableModel, sheetName) {
+export function createSpreeadSheetTable(tableModel) {
   const spareRow = tableModel.spareRow ?? false;
   const config = { ...defaultConfig, ...tableModel.config };
 
@@ -130,7 +130,6 @@ export function createSpreeadSheetTable(tableModel, sheetName) {
   const spreadSheet = {
     tabulator: table,
     spareRow: spareRow,
-    name: sheetName,
   };
   return table;
 }
