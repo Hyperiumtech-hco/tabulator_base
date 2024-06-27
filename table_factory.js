@@ -9,6 +9,7 @@ import { recursiveColumnLeafIterator } from "./table.js";
   }
 } */
 
+const clearValue = {};
 // TODO: auto column names
 // TODO: delete spare row on sort
 // TODO: undo/redo update formulas
@@ -23,6 +24,7 @@ const defaultConfig = {
   selectableRangeColumns: false,
   /* selectableRangeRows: true, */
   selectableRangeClearCells: true,
+  selectableRangeClearCellsValue: clearValue,
   /* rowHeader: {resizable: false, frozen: true, width:40, hozAlign:"center", formatter: "rownum", field:"rownum", accessorClipboard:"rownum"}, */
   //change edit trigger mode to make cell navigation smoother
   editTriggerEvent: "dblclick",
@@ -51,34 +53,32 @@ const defaultConfig = {
   },
 };
 
+function isCellEditable(cell) {
+  let isEditable = false;
+  const column = cell.getColumn();
+  const columnDef = column.getDefinition();
+  if (typeof columnDef.editable === "function") {
+    isEditable = columnDef.editable(cell);
+  } else {
+    isEditable = columnDef.editor !== undefined;
+  }
+  return isEditable;
+}
+
 export function createSpreeadSheetTable(tableModel) {
   const spareRow = tableModel.spareRow ?? false;
   const config = { ...defaultConfig, ...tableModel.config };
   let rowIndex = 0;
   linkMutators(tableModel);
-  for (const column of recursiveColumnLeafIterator(tableModel.config)) {
-    const isEditable = column.editor !== undefined || typeof column.editable === "function";
-    if (!isEditable) {
-      column.mutatorClipboard = function (value, data, type, params, component) {
-        if (type === "edit") {
-          return cell.getOldValue();
-        }
-        return value;
-      };
-      column.cellEdited = function (cell) {
-        if (typeof column.editable === "function") {
-          if (column.editable(cell)) {
-            cell.restoreOldValue();
-          }
-        } else {
-          cell.restoreOldValue();
-        }
-      };
-    }
-  }
+
   const table = new Tabulator(tableModel.id, config);
 
   table.on("cellEdited", function (cell) {
+    console.log("Its the source!!!");
+    if (!isCellEditable(cell) && cell.getValue() === clearValue) {
+      cell.restoreOldValue();
+      return;
+    }
     const lastIndex = table.getRows().length;
     if (spareRow && lastIndex === cell.getRow().getPosition()) {
       table.addRow({});
