@@ -74,11 +74,16 @@ export function createSpreeadSheetTable(tableModel) {
   const table = new Tabulator(tableModel.id, config);
 
   table.on("cellEdited", function (cell) {
-    console.log("Its the source!!!");
-    if (!isCellEditable(cell) && cell.getValue() === clearValue) {
-      cell.restoreOldValue();
-      return;
+    if (cell.getValue() === clearValue) {
+      if (!isCellEditable(cell)) {
+        cell.restoreOldValue();
+        return;
+      } else {
+        const row = cell.getRow();
+        row.update({ [cell.getField()]: "" });
+      }
     }
+
     const lastIndex = table.getRows().length;
     if (spareRow && lastIndex === cell.getRow().getPosition()) {
       table.addRow({});
