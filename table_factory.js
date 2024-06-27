@@ -54,41 +54,44 @@ const defaultConfig = {
 export function createSpreeadSheetTable(tableModel) {
   const spareRow = tableModel.spareRow ?? false;
   const config = { ...defaultConfig, ...tableModel.config };
-
+  let rowIndex = 0;
   linkMutators(tableModel);
   for (const column of recursiveColumnLeafIterator(tableModel.config)) {
-    let isEditable = false;
-    if (typeof column.editable === "function") {
-      isEditable = column.editable(cell);
-    } else {
-      isEditable = column.editor !== undefined;
-    }
+    const isEditable = column.editor !== undefined || typeof column.editable === "function";
     if (!isEditable) {
+      column.mutatorClipboard = function (value, data, type, params, component) {
+        if (type === "edit") {
+          return cell.getOldValue();
+        }
+        return value;
+      };
       column.cellEdited = function (cell) {
-        cell.restoreOldValue();
-      }
+        if (typeof column.editable === "function") {
+          if (column.editable(cell)) {
+            cell.restoreOldValue();
+          }
+        } else {
+          cell.restoreOldValue();
+        }
+      };
     }
   }
   const table = new Tabulator(tableModel.id, config);
 
   table.on("cellEdited", function (cell) {
-    const lastIndex = table.getRows().length - 1;
-    if (spareRow && lastIndex === rowPos) {
+    const lastIndex = table.getRows().length;
+    if (spareRow && lastIndex === cell.getRow().getPosition()) {
       table.addRow({});
     }
   });
 
   table.on("rowAdded", function (row) {
-    const lastIndex = table.getRows().length;
-    row.update({ id: lastIndex });
+    row.update({ id: ++rowIndex });
   });
 
-  // TODO: controller subscribe to table events
-  // TODO: mutator to cancel noneditable Cells
   table.on("clipboardPasted", function (clipboard, rowData, rows) {
-    let index = 0;
     if (rowData.length > rows.length && spareRow) {
-      table.addRow(rowData.slice(index));
+      table.addRow(rowData.slice(rows.length));
       table.addRow({});
     }
   });
