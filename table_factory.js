@@ -70,7 +70,25 @@ export function createSpreeadSheetTable(tableModel) {
   const config = { ...defaultConfig, ...tableModel.config };
   let rowIndex = 0;
   linkMutators(tableModel);
-
+  /* for (const column of recursiveColumnLeafIterator(tableModel.config)) {
+    if (column.editor === undefined || typeof column.editable === "function") {
+      column.mutatorData = function (value, data, type, params, component) {
+        if (type === "edit") {
+          let isEditable = false;
+          if (typeof column.editable === "function") {
+            isEditable = column.editable(cell);
+          } else {
+            isEditable = column.editor !== undefined;
+          }
+          if (!isEditable) {
+            return component.getOldValue();
+          } else { 
+            return value;
+          }
+        }
+      };
+    }
+  } */
   const table = new Tabulator(tableModel.id, config);
 
   table.on("cellEdited", function (cell) {
@@ -95,6 +113,17 @@ export function createSpreeadSheetTable(tableModel) {
   });
 
   table.on("clipboardPasted", function (clipboard, rowData, rows) {
+    let index = 0;
+    let repeat = 0;
+    for (; index < rows.length; index++) {
+      Object.entries(rowData[repeat]).forEach(function ([colPos, value]) {
+        const cell = rows[index].getCell(colPos).component;
+        if (!isCellEditable(cell)) {
+          cell.getRow().update({ [colPos]: cell.getOldValue() });
+        }
+      });
+      repeat = (repeat + 1) % rowData.length;
+    }
     if (rowData.length > rows.length && spareRow) {
       table.addRow(rowData.slice(rows.length));
       table.addRow({});
