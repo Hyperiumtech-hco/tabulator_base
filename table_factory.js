@@ -1,4 +1,6 @@
 import { linkMutators } from "./table.js";
+import { recursiveColumnLeafIterator } from "./table.js";
+
 //IDEA: use field to do calculations example
 // the formulas model its inmutable
 /* const formulas = {
@@ -17,8 +19,8 @@ const defaultConfig = {
   columnHeaderVertAlign: "middle", //align header contents to bottom of cell
   //enable range selection
   headerSortClickElement: "icon",
-  selectableRange: true,
-  selectableRangeColumns: true,
+  selectableRange: 1,
+  selectableRangeColumns: false,
   /* selectableRangeRows: true, */
   selectableRangeClearCells: true,
   /* rowHeader: {resizable: false, frozen: true, width:40, hozAlign:"center", formatter: "rownum", field:"rownum", accessorClipboard:"rownum"}, */
@@ -54,32 +56,23 @@ export function createSpreeadSheetTable(tableModel) {
   const config = { ...defaultConfig, ...tableModel.config };
 
   linkMutators(tableModel);
-
-  const table = new Tabulator(tableModel.id, config);
-
-  function checkCellEdited(cell) {
+  for (const column of recursiveColumnLeafIterator(tableModel.config)) {
     let isEditable = false;
-    const column = cell.getColumn();
-    const columnDef = column.getDefinition();
-    if (typeof columnDef.editable === "function") {
-      isEditable = columnDef.editable(cell);
+    if (typeof column.editable === "function") {
+      isEditable = column.editable(cell);
     } else {
-      isEditable = columnDef.editor !== undefined;
+      isEditable = column.editor !== undefined;
     }
     if (!isEditable) {
-      /* cell.restoreOldValue(); */
+      column.cellEdited = function (cell) {
+        cell.restoreOldValue();
+      }
     }
-    return isEditable;
   }
+  const table = new Tabulator(tableModel.id, config);
 
   table.on("cellEdited", function (cell) {
-    const colPos = cell.getColumn().getField();
-    const rowPos = cell.getRow().getIndex();
     const lastIndex = table.getRows().length - 1;
-    if (!checkCellEdited(cell)) {
-      return;
-    }
-
     if (spareRow && lastIndex === rowPos) {
       table.addRow({});
     }
@@ -94,14 +87,6 @@ export function createSpreeadSheetTable(tableModel) {
   // TODO: mutator to cancel noneditable Cells
   table.on("clipboardPasted", function (clipboard, rowData, rows) {
     let index = 0;
-    let repeat = 0;
-    for (; index < rows.length; index++) {
-      Object.entries(rowData[repeat]).forEach(function ([colPos, value]) {
-        const cell = rows[index].getCell(colPos).component;
-        checkCellEdited(cell);
-      });
-      repeat = (repeat + 1) % rowData.length;
-    }
     if (rowData.length > rows.length && spareRow) {
       table.addRow(rowData.slice(index));
       table.addRow({});
