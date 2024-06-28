@@ -25,6 +25,34 @@ const defaultConfig = {
   /* selectableRangeRows: true, */
   selectableRangeClearCells: true,
   selectableRangeClearCellsValue: clearValue,
+  clipboardPasteParser: function (clipboard) {
+    const parsedData = clipboard.split("\n").map((row) => {
+      return row.split("\t");
+    });
+    const rowData = [];
+    const selectedRange = this.table.getRanges()[0];
+    const bounds = selectedRange.getBounds();
+    if (bounds.start === bounds.end) {
+    } else {
+      selectedRange.getStructuredCells().forEach((row, rowIndex) => {
+        const parsedRow = parsedData[rowIndex % parsedData.length];
+        const data = {};
+        row.forEach((cell, cellIndex) => {
+          data[cell.getField()] = parsedRow[cellIndex % parsedRow.length];
+        });
+        rowData.push(data);
+      });
+    }
+    return rowData; //return array
+  },
+  clipboardPasteAction: function (rowData) {
+    const selectedRange = this.table.getRanges()[0];
+    selectedRange.getStructuredCells().forEach((row, rowIndex) => {
+      row.forEach((cell) => {
+        cell.setValue(rowData[rowIndex][cell.getField()]);
+      });
+    });
+  },
   /* rowHeader: {resizable: false, frozen: true, width:40, hozAlign:"center", formatter: "rownum", field:"rownum", accessorClipboard:"rownum"}, */
   //change edit trigger mode to make cell navigation smoother
   editTriggerEvent: "dblclick",
@@ -42,8 +70,8 @@ const defaultConfig = {
   },
   clipboardCopyStyled: false,
   clipboardCopyRowRange: "range",
-  clipboardPasteParser: "range",
-  clipboardPasteAction: "range",
+  /* clipboardPasteParser: "range", */
+  /* clipboardPasteAction: "range", */
   columnDefaults: {
     hozAlign: "center",
     vertAlign: "middle",
@@ -70,25 +98,7 @@ export function createSpreeadSheetTable(tableModel) {
   const config = { ...defaultConfig, ...tableModel.config };
   let rowIndex = 0;
   linkMutators(tableModel);
-  /* for (const column of recursiveColumnLeafIterator(tableModel.config)) {
-    if (column.editor === undefined || typeof column.editable === "function") {
-      column.mutatorData = function (value, data, type, params, component) {
-        if (type === "edit") {
-          let isEditable = false;
-          if (typeof column.editable === "function") {
-            isEditable = column.editable(cell);
-          } else {
-            isEditable = column.editor !== undefined;
-          }
-          if (!isEditable) {
-            return component.getOldValue();
-          } else { 
-            return value;
-          }
-        }
-      };
-    }
-  } */
+
   const table = new Tabulator(tableModel.id, config);
 
   table.on("cellEdited", function (cell) {
@@ -131,15 +141,6 @@ export function createSpreeadSheetTable(tableModel) {
   });
 
   table.on("tableBuilt", function () {
-    if (config.clipboardPasteParser === "range") {
-      const rangeParser = table.modules.clipboard.pasteParser.bind(table.modules.clipboard);
-      table.modules.clipboard.setPasteParser(function (clipboard) {
-        if (clipboard.endsWith("\n") || clipboard.endsWith("\r")) {
-          clipboard = clipboard.slice(0, -1);
-        }
-        return rangeParser(clipboard);
-      });
-    }
     if (tableModel.data !== undefined) {
       table.addRow(tableModel.data);
       table.clearHistory();
