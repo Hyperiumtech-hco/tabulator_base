@@ -25,7 +25,7 @@ const defaultConfig = {
   /* selectableRangeRows: true, */
   selectableRangeClearCells: true,
   selectableRangeClearCellsValue: clearValue,
-  clipboardPasteParser: function (clipboard) {
+  /*   clipboardPasteParser: function (clipboard) {
     const parsedData = clipboard.split("\n").map((row) => {
       return row.split("\t");
     });
@@ -52,6 +52,121 @@ const defaultConfig = {
         cell.setValue(rowData[rowIndex][cell.getField()]);
       });
     });
+  }, */
+  clipboardPasteParser: function (clipboard) {
+    var data = [],
+      rows = [],
+      range = this.table.modules.selectRange.activeRange,
+      singleCell = false,
+      bounds,
+      startCell,
+      colWidth,
+      columnMap,
+      startCol;
+
+    if (range) {
+      bounds = range.getBounds();
+      startCell = bounds.start;
+
+      if (bounds.start === bounds.end) {
+        singleCell = true;
+      }
+
+      if (startCell) {
+        //get data from clipboard into array of columns and rows.
+        clipboard = clipboard.split("\n");
+
+        clipboard.forEach(function (row) {
+          data.push(row.split("\t"));
+        });
+
+        if (data.length) {
+          columnMap = this.table.columnManager.getVisibleColumnsByIndex();
+          startCol = columnMap.indexOf(startCell.column);
+
+          if (startCol > -1) {
+            if (singleCell) {
+              colWidth = data[0].length;
+            } else {
+              colWidth = columnMap.indexOf(bounds.end.column) - startCol + 1;
+            }
+
+            columnMap = columnMap.slice(startCol, startCol + colWidth);
+
+            data.forEach((item) => {
+              var row = {};
+              var itemLength = item.length;
+
+              columnMap.forEach(function (col, i) {
+                row[col.field] = item[i % itemLength];
+              });
+
+              rows.push(row);
+            });
+
+            return rows;
+          }
+        }
+      }
+    }
+
+    return false;
+  },
+  clipboardPasteAction: function (data) {
+    var rows = [],
+      range = this.table.modules.selectRange.activeRange,
+      singleCell = false,
+      bounds,
+      startCell,
+      startRow,
+      rowWidth,
+      dataLength;
+
+    dataLength = data.length;
+
+    if (range) {
+      bounds = range.getBounds();
+      startCell = bounds.start;
+
+      if (bounds.start === bounds.end) {
+        singleCell = true;
+      }
+
+      if (startCell) {
+        rows = range.getRows();
+        startRow = rows.indexOf(startCell.row);
+
+        if (singleCell) {
+          rowWidth = data.length;
+        } else {
+          rowWidth = rows.indexOf(bounds.end.row) - startRow + 1;
+        }
+
+        if (startRow > -1) {
+          this.table.blockRedraw();
+
+          rows = rows.slice(startRow, startRow + rowWidth);
+
+          rows.forEach((row, i) => {
+            const dataObj = data[i % dataLength];
+            const dataToUpdate = Object.keys(dataObj)
+              .filter((key) => {
+                const cell = row.getCell(key);
+                return isCellEditable(cell.component);
+              })
+              .reduce((obj, key) => {
+                obj[key] = dataObj[key];
+                return obj;
+              }, {});
+            row.updateData(dataToUpdate);
+          });
+
+          this.table.restoreRedraw();
+        }
+      }
+    }
+
+    return rows;
   },
   /* rowHeader: {resizable: false, frozen: true, width:40, hozAlign:"center", formatter: "rownum", field:"rownum", accessorClipboard:"rownum"}, */
   //change edit trigger mode to make cell navigation smoother
@@ -123,17 +238,6 @@ export function createSpreeadSheetTable(tableModel) {
   });
 
   table.on("clipboardPasted", function (clipboard, rowData, rows) {
-    let index = 0;
-    let repeat = 0;
-    for (; index < rows.length; index++) {
-      Object.entries(rowData[repeat]).forEach(function ([colPos, value]) {
-        const cell = rows[index].getCell(colPos).component;
-        if (!isCellEditable(cell)) {
-          cell.getRow().update({ [colPos]: cell.getOldValue() });
-        }
-      });
-      repeat = (repeat + 1) % rowData.length;
-    }
     if (rowData.length > rows.length && spareRow) {
       table.addRow(rowData.slice(rows.length));
       table.addRow({});
