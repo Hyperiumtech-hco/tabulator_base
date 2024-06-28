@@ -14,7 +14,7 @@ const clearValue = {};
 // TODO: delete spare row on sort
 // TODO: undo/redo update formulas
 const defaultConfig = {
-  /* renderHorizontal:"virtual", */
+  placeholder:"Sin Datos", //display message to user on empty table
   layout: "fitDataFill",
   layoutColumnsOnNewData: true,
   columnHeaderVertAlign: "middle", //align header contents to bottom of cell
@@ -121,7 +121,7 @@ const defaultConfig = {
             return arr;
           }
         };
-        rows = this.table.rowManager.activeRows.slice()
+        rows = this.table.rowManager.activeRows.slice();
         if (this.table.options.dataTree) {
           rows = rows.reduce(flattenParent, []);
         }
