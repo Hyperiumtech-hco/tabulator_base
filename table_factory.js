@@ -25,34 +25,6 @@ const defaultConfig = {
   /* selectableRangeRows: true, */
   selectableRangeClearCells: true,
   selectableRangeClearCellsValue: clearValue,
-  /*   clipboardPasteParser: function (clipboard) {
-    const parsedData = clipboard.split("\n").map((row) => {
-      return row.split("\t");
-    });
-    const rowData = [];
-    const selectedRange = this.table.getRanges()[0];
-    const bounds = selectedRange.getBounds();
-    if (bounds.start === bounds.end) {
-    } else {
-      selectedRange.getStructuredCells().forEach((row, rowIndex) => {
-        const parsedRow = parsedData[rowIndex % parsedData.length];
-        const data = {};
-        row.forEach((cell, cellIndex) => {
-          data[cell.getField()] = parsedRow[cellIndex % parsedRow.length];
-        });
-        rowData.push(data);
-      });
-    }
-    return rowData; //return array
-  },
-  clipboardPasteAction: function (rowData) {
-    const selectedRange = this.table.getRanges()[0];
-    selectedRange.getStructuredCells().forEach((row, rowIndex) => {
-      row.forEach((cell) => {
-        cell.setValue(rowData[rowIndex][cell.getField()]);
-      });
-    });
-  }, */
   clipboardPasteParser: function (clipboard) {
     var data = [],
       rows = [],
@@ -133,7 +105,27 @@ const defaultConfig = {
       }
 
       if (startCell) {
-        rows = range.getRows();
+        const flattenTree = (arr, row) => {
+          arr.push(row._row);
+          if (row.getTreeChildren()) {
+            return row.getTreeChildren().reduce(flattenTree, arr);
+          } else {
+            return arr;
+          }
+        };
+        const flattenParent = (arr, row) => {
+          arr.push(row);
+          if (row.component.getTreeChildren()) {
+            return row.component.getTreeChildren().reduce(flattenTree, arr);
+          } else {
+            return arr;
+          }
+        };
+        rows = this.table.rowManager.activeRows.slice()
+        if (this.table.options.dataTree) {
+          rows = rows.reduce(flattenParent, []);
+        }
+
         startRow = rows.indexOf(startCell.row);
 
         if (singleCell) {
