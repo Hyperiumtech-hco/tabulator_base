@@ -1,20 +1,11 @@
 import { linkMutators } from "./table.js";
 import { recursiveColumnLeafIterator } from "./table.js";
 
-//IDEA: use field to do calculations example
-// the formulas model its inmutable
-/* const formulas = {
-  "field1": (cell) {
-    calculateTotal();
-  }
-} */
-
 const clearValue = {};
-// TODO: auto column names
+// TODO: auto column group names
 // TODO: delete spare row on sort
-// TODO: undo/redo update formulas
 const defaultConfig = {
-  placeholder:"Sin Datos", //display message to user on empty table
+  placeholder: "Sin Datos", //display message to user on empty table
   layout: "fitDataFill",
   layoutColumnsOnNewData: true,
   columnHeaderVertAlign: "middle", //align header contents to bottom of cell
@@ -160,7 +151,6 @@ const defaultConfig = {
 
     return rows;
   },
-  /* rowHeader: {resizable: false, frozen: true, width:40, hozAlign:"center", formatter: "rownum", field:"rownum", accessorClipboard:"rownum"}, */
   //change edit trigger mode to make cell navigation smoother
   editTriggerEvent: "dblclick",
   history: true,
@@ -177,8 +167,6 @@ const defaultConfig = {
   },
   clipboardCopyStyled: false,
   clipboardCopyRowRange: "range",
-  /* clipboardPasteParser: "range", */
-  /* clipboardPasteAction: "range", */
   columnDefaults: {
     hozAlign: "center",
     vertAlign: "middle",
@@ -202,7 +190,14 @@ function isCellEditable(cell) {
 
 export function createSpreeadSheetTable(tableModel) {
   const spareRow = tableModel.spareRow ?? false;
+  const columnDefaults = tableModel.config.columnDefaults ?? {};
+  defaultConfig.columnDefaults = {
+    ...defaultConfig.columnDefaults,
+    ...columnDefaults,
+  };
+  delete tableModel.config.columnDefaults;
   const config = { ...defaultConfig, ...tableModel.config };
+  tableModel.config.columnDefaults = columnDefaults;
   let rowIndex = 0;
   linkMutators(tableModel);
 

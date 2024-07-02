@@ -1,5 +1,20 @@
 import { sun_currency_formatter, make_percent_formatter } from "./formatters.js";
 
+//define custom accessor
+export const emptyValueAccessor = function (value, data, type, params, column, row) {
+  if (value === undefined || value === null) {
+    if (column.getDefinition().editor === "number") {
+      return 0;
+    } else {
+      return "";
+    }
+  } else if (Number.isNaN(value)) {
+    return 0;
+  } else {
+    return value;
+  }
+};
+
 export function* recursiveColumnLeafIterator(colDef) {
   if (!colDef.columns) {
     yield colDef;
@@ -155,9 +170,7 @@ export function getData(table) {
 }
 
 export function filterColumns(data, start, end) {
-  return data
-    .filter((row) => row.spare === undefined)
-    .map((row) => Object.fromEntries(Object.entries(row).slice(start, end)));
+  return data.filter((row) => row.spare === undefined).map((row) => Object.fromEntries(Object.entries(row).slice(start, end)));
 }
 
 export async function deleteAllRows(table) {

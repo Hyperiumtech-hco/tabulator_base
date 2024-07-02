@@ -1,9 +1,24 @@
-export var pen_formatter = new Intl.NumberFormat("es-PE", {
+export const lt_dia_formatter = (value) => {
+  return `${value.toFixed(2)} Lt / dia`
+}
+
+export const m3_formatter = (value) => {
+  return `${value.toFixed(2)} m3`
+}
+export const m2_formatter = (value) => {
+  return `${value.toFixed(2)} m2`
+}
+
+export const m_formatter = (value) => {
+  return `${value.toFixed(2)} m`
+}
+
+export const pen_formatter = new Intl.NumberFormat("es-PE", {
   style: "currency",
   currency: "PEN",
 });
 
-export var sun_currency_formatter = {
+export const sun_currency_formatter = {
   formatter: "money",
   formatterParams: {
     decimal: ".",
@@ -15,7 +30,7 @@ export var sun_currency_formatter = {
 
 export const percent_formatter = (value, precision) => (value * 100).toFixed(precision) + "%";
 
-export var make_round_formatter = function (precision) {
+export const make_round_formatter = function (precision) {
   return function (cell, formatterParams, onRendered) {
     //cell - the cell component
     //formatterParams - parameters set for the column
@@ -25,7 +40,7 @@ export var make_round_formatter = function (precision) {
   };
 };
 
-export var make_percent_formatter = function (precision) {
+export const make_percent_formatter = function (precision) {
   return function (cell, formatterParams, onRendered) {
     //cell - the cell component
     //formatterParams - parameters set for the column
@@ -35,7 +50,7 @@ export var make_percent_formatter = function (precision) {
   };
 };
 
-export var tree_currency_formater = {
+export const tree_currency_formater = {
   formatter: function (cell, formatterParams, onRendered) {
     //cell - the cell component
     //formatterParams - parameters set for the column
@@ -53,7 +68,7 @@ export var tree_currency_formater = {
   },
 };
 
-export var bold_formatter = (...rows) => {
+export const bold_formatter = (...rows) => {
   return {
     formatter: function (cell, formatterParams, onRendered) {
       //cell - the cell component
