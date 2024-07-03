@@ -1,17 +1,26 @@
 export const lt_dia_formatter = (value) => {
-  return `${value.toFixed(2)} Lt / dia`
-}
+  return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} Lt / dia`;
+};
+
+export const lt_per_dia_formatter = (value) => {
+  return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} Lt x per / dia`;
+};
+
+export const lt_m2_dia_formatter = (value) => {
+  return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} Lt x m2 / dia`;
+};
 
 export const m3_formatter = (value) => {
-  return `${value.toFixed(2)} m3`
-}
+  return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} m3`;
+};
+
 export const m2_formatter = (value) => {
-  return `${value.toFixed(2)} m2`
-}
+  return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} m2`;
+};
 
 export const m_formatter = (value) => {
-  return `${value.toFixed(2)} m`
-}
+  return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} m`;
+};
 
 export const pen_formatter = new Intl.NumberFormat("es-PE", {
   style: "currency",
@@ -30,13 +39,34 @@ export const sun_currency_formatter = {
 
 export const percent_formatter = (value, precision) => (value * 100).toFixed(precision) + "%";
 
+export const make_lt_dia_formatter = function (precision) {
+  return function (cell, formatterParams, onRendered) {
+    const value = parseFloat(cell.getValue());
+    return isNaN(value) ? "" : lt_dia_formatter(cell.getValue());
+  };
+};
+
+export const make_lt_per_dia_formatter = function (precision) {
+  return function (cell, formatterParams, onRendered) {
+    const value = parseFloat(cell.getValue());
+    return isNaN(value) ? "" : lt_per_dia_formatter(cell.getValue());
+  };
+};
+
+export const make_lt_m2_dia_formatter_formatter = function (precision) {
+  return function (cell, formatterParams, onRendered) {
+    const value = parseFloat(cell.getValue());
+    return isNaN(value) ? "" : lt_m2_dia_formatter(cell.getValue());
+  };
+};
+
 export const make_round_formatter = function (precision) {
   return function (cell, formatterParams, onRendered) {
     //cell - the cell component
     //formatterParams - parameters set for the column
     //onRendered - function to call when the formatter has been rendered
     const value = parseFloat(cell.getValue());
-    return isNaN(value) ? value : value.toFixed(precision); //return the contents of the cell;
+    return isNaN(value) ? "" : value.toFixed(precision); //return the contents of the cell;
   };
 };
 
