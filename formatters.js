@@ -22,6 +22,22 @@ export const m_formatter = (value) => {
   return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} m`;
 };
 
+export const m_sign_formatter = (value) => {
+  return `${isNaN(parseFloat(value)) ? 0 : `${value >= 0 ? "+" : ""}${value.toFixed(2)}`} m`;
+};
+
+export const lt_formatter = (value) => {
+  return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(3)} L`;
+}
+
+export const ls_formatter = (value) => {
+  return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} L/s`;
+}
+
+export const h_formatter = (value) => {
+  return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} hrs`;
+}
+
 export const pen_formatter = new Intl.NumberFormat("es-PE", {
   style: "currency",
   currency: "PEN",
