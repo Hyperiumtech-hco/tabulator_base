@@ -184,7 +184,7 @@ export const makeCreateDeleteColumn = (id) => {
     headerSort: false,
     width: 75,
     titleFormatter: function (cell, formatterParams, onRendered) {
-      const fname = `makeCreateDeleteColumn_addItem_tbl_${id}`;
+      const fname = `makeCreateDeleteColumn_addItem_tbl_${id.substring(1)}`;
       window[fname] = (event) => {
         event.preventDefault();
         cell.getTable().addRow({});
@@ -192,8 +192,8 @@ export const makeCreateDeleteColumn = (id) => {
       return `<button type="button" class="btn btn-success" onclick=${fname}(event)>+</button>`;
     },
     formatter: function (cell, formatterParams, onRendered) {
-      const fDelete = `makeCreateDeleteColumn_removeItemBelow_tbl_${id}`;
-      const fCreate = `makeCreateDeleteColumn_addItemBelow_tbl_${id}`;
+      const fDelete = `makeCreateDeleteColumn_removeItemBelow_tbl_${id.substring(1)}`;
+      const fCreate = `makeCreateDeleteColumn_addItemBelow_tbl_${id.substring(1)}`;
       window[fDelete] = (event) => {
         cell.getRow().delete();
       };
