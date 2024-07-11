@@ -14,6 +14,10 @@ export const m3_formatter = (value) => {
   return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} m3`;
 };
 
+export const m3_h_formatter = (value) => {
+  return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} m3/h`;
+};
+
 export const m2_formatter = (value) => {
   return `${isNaN(parseFloat(value)) ? 0 : value.toFixed(2)} m2`;
 };
