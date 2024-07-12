@@ -183,6 +183,7 @@ export const makeCreateDeleteColumn = (id) => {
   return {
     headerSort: false,
     width: 75,
+    resizable: false,
     titleFormatter: function (cell, formatterParams, onRendered) {
       const fname = `makeCreateDeleteColumn_addItem_tbl_${id.substring(1)}`;
       window[fname] = (event) => {
