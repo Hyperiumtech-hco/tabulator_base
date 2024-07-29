@@ -193,8 +193,8 @@ export const makeCreateDeleteColumn = (id) => {
       return `<button type="button" class="btn btn-success" onclick=${fname}(event)>+</button>`;
     },
     formatter: function (cell, formatterParams, onRendered) {
-      const fDelete = `makeCreateDeleteColumn_removeItemBelow_tbl_${id.substring(1)}`;
-      const fCreate = `makeCreateDeleteColumn_addItemBelow_tbl_${id.substring(1)}`;
+      const fDelete = `makeCreateDeleteColumn_removeItemBelow_tbl_${id.substring(1)}${cell.getRow().getIndex()}`;
+      const fCreate = `makeCreateDeleteColumn_addItemBelow_tbl_${id.substring(1)}${cell.getRow().getIndex()}`;
       window[fDelete] = (event) => {
         cell.getRow().delete();
       };
