@@ -221,7 +221,8 @@ export function createSpreeadSheetTable(tableModel) {
   });
 
   table.on("rowAdded", function (row) {
-    row.update({ id: ++rowIndex });
+    const nextIndex = ++rowIndex;
+    row.update({ id: nextIndex });
   });
 
   table.on("clipboardPasted", function (clipboard, rowData, rows) {
