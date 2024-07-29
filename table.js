@@ -199,7 +199,7 @@ export const makeCreateDeleteColumn = (id) => {
         cell.getRow().delete();
       };
       window[fCreate] = (event) => {
-        cell.getTable().addRow({}, true, cell.getRow().getIndex());
+        cell.getTable().addRow({}, false, cell.getRow().getIndex());
       };
       return `<button type="button" class="btn btn-success" onclick=${fCreate}(event)>+</button><button type="button" class="btn btn-danger" onclick=${fDelete}(event)>-</button>`;
     },
