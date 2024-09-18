@@ -5,6 +5,7 @@ const clearValue = {};
 // TODO: auto column group names
 // TODO: delete spare row on sort
 const defaultConfig = {
+  editTriggerEvent:"click", //trigger edit on double click
   placeholder: "Sin Datos", //display message to user on empty table
   layout: "fitDataFill",
   layoutColumnsOnNewData: true,
