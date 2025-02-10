@@ -5,7 +5,7 @@ const clearValue = {};
 // TODO: auto column group names
 // TODO: delete spare row on sort
 const defaultConfig = {
-  editTriggerEvent:"click", //trigger edit on double click
+  editTriggerEvent: "click", //trigger edit on double click
   placeholder: "Sin Datos", //display message to user on empty table
   layout: "fitDataFill",
   layoutColumnsOnNewData: true,
@@ -38,7 +38,7 @@ const defaultConfig = {
 
       if (startCell) {
         //get data from clipboard into array of columns and rows.
-        clipboard = clipboard.split("\n");
+        clipboard = clipboard.replaceAll("\r\n", "\n").split("\n");
 
         clipboard.forEach(function (row) {
           data.push(row.split("\t"));
@@ -241,11 +241,8 @@ export function createSpreeadSheetTable(tableModel) {
     if (spareRow) {
       table.addRow({});
     }
+    table.redraw();
   });
   table["spareRow"] = spareRow;
-  const spreadSheet = {
-    tabulator: table,
-    spareRow: spareRow,
-  };
   return table;
 }

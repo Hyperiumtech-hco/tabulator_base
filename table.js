@@ -170,7 +170,9 @@ export function getData(table) {
 }
 
 export function filterColumns(data, start, end) {
-  return data.filter((row) => row.spare === undefined).map((row) => Object.fromEntries(Object.entries(row).slice(start, end)));
+  return data
+    .filter((row) => row.spare === undefined)
+    .map((row) => Object.fromEntries(Object.entries(row).slice(start, end)));
 }
 
 export async function deleteAllRows(table) {
