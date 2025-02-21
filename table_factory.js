@@ -1,3 +1,6 @@
+import "tabulator-tables/dist/css/tabulator.min.css";
+import { TabulatorFull as Tabulator } from "tabulator-tables";
+
 import { linkMutators } from "./table.js";
 import { recursiveColumnLeafIterator } from "./table.js";
 
